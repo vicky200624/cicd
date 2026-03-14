@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Git Clone') {
+            steps {
+                git branch: 'main',
+                    credentialsId: 'vicky',
+                    url: 'https://github.com/vicky200624/cicd.git'
+            }
+        }
+
+        stage('List Files') {
+            steps {
+                sh 'ls -l'
+            }
+        }
+
+        stage('Run Python Script') {
+            steps {
+                sh '''
+                python3 -m venv venv
+                . venv/bin/activate
+                pip3 install -r requirements.txt
+                python3 aiops_log__analysis.py
+                '''
+            }
+        }
+
+    }
+
+    post {
+
+        success {
+            emailext (
+                subject: "Jenkins Build Success",
+                body: "Build completed successfully",
+                to: "gamingvickey126@gmail.com"
+            )
+        }
+
+        failure {
+            emailext (
+                subject: "Jenkins Build Failed",
+                body: "Build failed. Check Jenkins.",
+                to: "gamingvickey126@gmail.com"
+            )
+        }
+
+    }
+}
